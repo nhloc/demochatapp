@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatbot Hỏi Đáp</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 h-screen flex flex-col items-center justify-center p-4">
+  <div class="w-full max-w-2xl bg-white shadow-lg rounded-xl flex flex-col h-full p-4">
+    <h1 class="text-2xl font-bold mb-4 text-center">Chatbot Hỏi Đáp</h1>
+
+    <div id="chatBox" class="flex-1 overflow-y-auto space-y-4 p-4 border rounded-lg bg-gray-50">
+      <!-- Tin nhắn sẽ được thêm vào đây -->
+    </div>
+
+    <div class="mt-4 flex gap-2">
+      <textarea id="questionInput" rows="2" class="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="Nhập câu hỏi..."></textarea>
+      <button onclick="askQuestion()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Gửi</button>
+    </div>
+  </div>
+
+  <script>
+    const chatBox = document.getElementById("chatBox");
+    const questionInput = document.getElementById("questionInput");
+  
+    function addMessage(sender, text) {
+      const wrapper = document.createElement("div");
+      wrapper.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
+  
+      const message = document.createElement("div");
+      message.className = `p-3 rounded-lg w-fit max-w-[80%] ${sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-900'}`;
+      message.textContent = text;
+  
+      wrapper.appendChild(message);
+      chatBox.appendChild(wrapper);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  
+    async function askQuestion() {
+      const question = questionInput.value.trim();
+      if (!question) return;
+  
+      addMessage("user", question);
+      questionInput.value = "";
+  
+      try {
+        const res = await fetch("https://nhloccit-ragbot.hf.space/ask", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ question })
+        });
+  
+        const data = await res.json();
+        addMessage("bot", data.answer);
+      } catch (error) {
+        addMessage("bot", "Đã xảy ra lỗi khi gửi câu hỏi.");
+        console.error(error);
+      }
+    }
+  
+    // Bắt sự kiện nhấn Enter
+    questionInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault(); // Ngăn xuống dòng
+        askQuestion(); // Gửi câu hỏi
+      }
+    });
+  </script>
+  
+</body>
+</html>

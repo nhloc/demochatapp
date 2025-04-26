@@ -5,15 +5,69 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chatbot Hỏi Đáp Tuyển Sinh 2025</title>
   <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 h-screen flex flex-col items-center justify-center p-4">
-    <div class="w-full max-w-5xl bg-white shadow-lg rounded-xl flex flex-col h-full p-4">
-    <h1 class="text-2xl font-bold mb-4 text-center">Chatbot Hỏi Đáp</h1>
+  <style>
+    body {
+      background: linear-gradient(to bottom right, #dbeafe, #f0f9ff);
+    }
 
+    @keyframes slideFadeIn {
+      0% {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .animate-slideFadeIn {
+      animation: slideFadeIn 0.5s ease-out;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 1; }
+    }
+    .dot-typing span {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      margin: 0 2px;
+      background-color: #999;
+      border-radius: 50%;
+      animation: blink 1.4s infinite both;
+    }
+    .dot-typing span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    .dot-typing span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+  </style>
+</head>
+
+<body class="h-screen flex flex-col items-center justify-center p-4">
+
+  <div class="w-full max-w-5xl bg-white shadow-lg rounded-xl flex flex-col h-full p-4">
+    <h1 class="text-2xl font-bold mb-4 text-center">Trung tâm tư vấn tuyển sinh CTU 2025</h1>
+
+    <!-- Welcome message -->
+    <div id="welcomeMessage" class="flex items-center justify-between p-4 bg-white rounded-xl shadow mb-4 animate-slideFadeIn">
+      <div>
+        <p class="text-blue-600 font-bold text-lg">Xin chào!</p>
+        <p class="text-gray-800">CTU Guide có thể giúp gì cho bạn?</p>
+      </div>
+      <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-blue-300 shadow">
+        <img src="https://cdni.iconscout.com/illustration/premium/thumb/chat-bot-give-hello-illustration-download-in-svg-png-gif-file-formats--greeting-robot-pack-science-technology-illustrations-7207940.png" alt="Anime Avatar" class="w-full h-full object-cover">
+      </div>
+    </div>
+
+    <!-- Chat box -->
     <div id="chatBox" class="flex-1 overflow-y-auto space-y-4 p-4 border rounded-lg bg-gray-50">
       <!-- Tin nhắn sẽ được thêm vào đây -->
     </div>
 
+    <!-- Input -->
     <div class="mt-4 flex gap-2">
       <textarea id="questionInput" rows="2" class="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="Nhập câu hỏi..."></textarea>
       <button onclick="askQuestion()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Gửi</button>
@@ -23,52 +77,104 @@
   <script>
     const chatBox = document.getElementById("chatBox");
     const questionInput = document.getElementById("questionInput");
-  
+
+    const botAvatar = "https://cdni.iconscout.com/illustration/premium/thumb/chat-bot-give-hello-illustration-download-in-svg-png-gif-file-formats--greeting-robot-pack-science-technology-illustrations-7207940.png"; 
+    const userAvatar = "https://img.freepik.com/premium-vector/happy-european-guy-portrait-flat-style-avatar-young-man-cute-vector-illustration_647188-77.jpg"; 
+
+    window.addEventListener("load", () => {
+      const welcome = document.getElementById("welcomeMessage");
+      setTimeout(() => {
+        if (welcome) welcome.remove();
+      }, 4000);
+    });
+
     function addMessage(sender, text) {
       const wrapper = document.createElement("div");
-      wrapper.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
-  
+      wrapper.className = `flex items-end ${sender === 'user' ? 'justify-end' : 'justify-start'} gap-2 animate-slideFadeIn`;
+
+      const avatar = document.createElement("img");
+      avatar.className = "w-8 h-8 rounded-full";
+      avatar.src = sender === 'user' ? userAvatar : botAvatar;
+
       const message = document.createElement("div");
-      message.className = `p-3 rounded-lg w-fit max-w-[80%] ${sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-900'}`;
+      message.className = `p-3 rounded-lg w-fit max-w-[70%] ${sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-900'}`;
       message.textContent = text;
-  
-      wrapper.appendChild(message);
+
+      if (sender === 'user') {
+        wrapper.appendChild(message);
+        wrapper.appendChild(avatar);
+      } else {
+        wrapper.appendChild(avatar);
+        wrapper.appendChild(message);
+      }
+
       chatBox.appendChild(wrapper);
       chatBox.scrollTop = chatBox.scrollHeight;
     }
-  
+
+    function addTyping() {
+      const wrapper = document.createElement("div");
+      wrapper.id = "typingIndicator";
+      wrapper.className = "flex items-end justify-start gap-2 animate-slideFadeIn";
+
+      const avatar = document.createElement("img");
+      avatar.className = "w-8 h-8 rounded-full";
+      avatar.src = botAvatar;
+
+      const bubble = document.createElement("div");
+      bubble.className = "p-3 rounded-lg bg-gray-200 flex items-center gap-1";
+
+      bubble.innerHTML = `
+        <div class="dot-typing">
+          <span></span><span></span><span></span>
+        </div>
+      `;
+
+      wrapper.appendChild(avatar);
+      wrapper.appendChild(bubble);
+
+      chatBox.appendChild(wrapper);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function removeTyping() {
+      const typing = document.getElementById("typingIndicator");
+      if (typing) typing.remove();
+    }
+
     async function askQuestion() {
       const question = questionInput.value.trim();
       if (!question) return;
-  
+
       addMessage("user", question);
       questionInput.value = "";
-  
+
+      addTyping();
+
       try {
         const res = await fetch("https://nhloccit-ragbot.hf.space/ask", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ question })
         });
-  
+
         const data = await res.json();
+        removeTyping();
         addMessage("bot", data.answer);
       } catch (error) {
+        removeTyping();
         addMessage("bot", "Đã xảy ra lỗi khi gửi câu hỏi.");
         console.error(error);
       }
     }
-  
-    // Bắt sự kiện nhấn Enter
+
     questionInput.addEventListener("keydown", function (e) {
       if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault(); // Ngăn xuống dòng
-        askQuestion(); // Gửi câu hỏi
+        e.preventDefault();
+        askQuestion();
       }
     });
   </script>
-  
+
 </body>
 </html>
